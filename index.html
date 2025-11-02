@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>فرم نظرسنجی کارآموزان</title>
+  <style>
+    body{font-family:Tahoma, Arial, sans-serif;max-width:900px;margin:24px auto;padding:12px;background:#f7f7fb;color:#222}
+    h1{font-size:20px;margin-bottom:6px}
+    .question{background:#fff;border-radius:8px;padding:12px;margin:10px 0;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+    .opts{display:flex;gap:10px;flex-wrap:wrap}
+    label{cursor:pointer}
+    .actions{margin-top:14px}
+    button{padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
+    .btn-primary{background:#2563eb;color:white}
+    .btn-ghost{background:#eee}
+    .note{font-size:13px;color:#333;background:#fff;padding:8px;border-radius:6px}
+    footer{margin-top:30px;font-size:12px;color:#666}
+  </style>
+</head>
+<body>
+  <h1>فرم نظرسنجی کارآموزان</h1>
+  <p class="note">لطفاً به هر سؤال تنها یک گزینه انتخاب کنید.</p>
+
+  <form id="surveyForm">
+    <div id="questions"></div>
+    <div class="actions">
+      <button type="submit" class="btn-primary">ارسال پاسخ</button>
+      <button type="button" id="resetBtn" class="btn-ghost">پاک کردن پاسخ‌ها</button>
+    </div>
+  </form>
+
+  <div id="message" style="margin-top:12px"></div>
+
+<script>
+const questions = [
+  "ارائه آموزش های عملی مطابق با محتوا و ساعت استاندارد",
+  "ارائه مطالب تئوری مطابق با محتوا و ساعت استاندارد",
+  "تفهيم مطالب با مثال هاي كاربردي",
+  "تسلط مربي به موضوع تدريس و پاسخگويي مناسب به سئوالات",
+  "استفاده از كارهاي گروهي و عملي و مشاركت كارآموز در مباحث درسي",
+  "استفاده از وسايل كمك آموزشي و معرفي منابع موردنياز",
+  "نوبودن یا قابلیت استفاده دستگاه ها",
+  "به تعداد بودن دستگاه ها (مناسب با تعداد کارآموز)",
+  "نوبودن و استاندارد بودن ابزار",
+  "تعداد مناسب ابزار",
+  "کیفیت مواد مصرفي",
+  "به اندازه بودن (موجودی موردنیاز)",
+  "وضعیت سیستم حرارتی کارگاه",
+  "وضعیت سیستم برودتی کارگاه",
+  "ایمنی و بهداشت کارگاه",
+  "ایجاد انگیزه در کارآموزان",
+  "شروع و پایان به موقع آموزش روزانه",
+  "طرز برخورد با کارآموزان",
+  "میزان رضایت از بازدید آموزشی و کارورزی",
+  "نحوه راهنمایی و مشاوره مربی در انجام پروژه عملی"
+];
+
+const options = ['خیلی خوب','خوب','متوسط','ضعیف','خیلی ضعیف'];
+
+const qDiv = document.getElementById('questions');
+questions.forEach((q, idx) => {
+  const cont = document.createElement('div');
+  cont.className = 'question';
+  cont.innerHTML = `<div><strong>${idx+1}. ${q}</strong></div>`;
+  const opts = document.createElement('div');
+  opts.className = 'opts';
+  options.forEach((opt,i) => {
+    const id = `q${idx}_o${i}`;
+    const label = document.createElement('label');
+    label.innerHTML = `<input type="radio" name="q${idx}" value="${opt}" id="${id}" required> ${opt}`;
+    opts.appendChild(label);
+  });
+  cont.appendChild(opts);
+  qDiv.appendChild(cont);
+});
+
+const STORAGE_KEY = 'survey_responses_v1';
+
+function loadResponses(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch(e){return[];}}
+function saveResponse(obj){const arr=loadResponses();arr.push(obj);localStorage.setItem(STORAGE_KEY,JSON.stringify(arr));}
+function clearResponses(){localStorage.removeItem(STORAGE_KEY);}
+
+const form=document.getElementById('surveyForm');
+const message=document.getElementById('message');
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const ans={};let valid=true;
+  questions.forEach((q,idx)=>{
+    const v=form.elements[`q${idx}`].value;
+    if(!v)valid=false;
+    ans[`q${idx}`]=v;
+  });
+  if(!valid){message.innerText='لطفاً به همه‌ی سوالات پاسخ دهید.';return;}
+  ans.timestamp=new Date().toISOString();
+  saveResponse(ans);
+  message.innerText='پاسخ شما ثبت شد. متشکریم!';
+  form.reset();
+});
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(confirm('آیا می‌خواهید پاسخ‌های وارد شده در این مرورگر پاک شود؟')){
+    clearResponses();
+    alert('پاسخ‌ها پاک شدند.');
+  }
+});
+</script>
+</body>
+</html>
